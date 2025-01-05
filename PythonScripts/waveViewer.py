@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import configparser
 
 # 定义目录路径
-dir_name = '20241226_155137'
+dir_name = '20250103_164553'
 NpWaveData_path = '..' + os.sep + 'NpWaveData' + os.sep + dir_name
 
 waveform_data = np.load(NpWaveData_path + os.sep + 'waveform_data.npy')
@@ -24,7 +24,7 @@ for i in range(spots_num):
     spots_list.append([x,y])
 
 idxfrom = 0
-idxto = 400
+idxto = 1000
 
 for idx, spot in enumerate(spots_list):
     plt.figure(str(spot[0])+','+str(spot[1])+','+str(idx))

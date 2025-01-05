@@ -6,25 +6,27 @@ from tkinter import ttk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 
-# 定义目录路径
-dir_name = '20241226_155137'
-NpWaveData_path = '..' + os.sep + 'NpWaveData' + os.sep + dir_name
-
-waveform_data = np.load(NpWaveData_path + os.sep + 'waveform_data.npy')
-
-# 解析index.ini文件
-ini_path = os.path.join(NpWaveData_path, 'Grid.ini')
+config_path = os.path.join('.', 'config.ini')
 config = configparser.ConfigParser()
-config.read(ini_path)
+config.read(config_path)
+
+py_data_path = config['DataSelect']['CurrentDataBase']
+py_data_path = os.path.join('.', 'NpWaveData', py_data_path)
+
+waveform_data = np.load(os.path.join(py_data_path, 'waveform_data.npy'))
+
+# 解析Metadata.ini文件
+config_metadata = configparser.ConfigParser()
+config_metadata.read(os.path.join(py_data_path, 'Metadata.ini'))
 
 # 读取网格信息
 grid_info = {
-    'minX': int(config['Grid']['minX']),
-    'minY': int(config['Grid']['minY']),
-    'maxX': int(config['Grid']['maxX']),
-    'maxY': int(config['Grid']['maxY']),
-    'numX': int(config['Grid']['numX']),
-    'numY': int(config['Grid']['numY']),
+    'minX': int(config_metadata['Grid']['minX']),
+    'minY': int(config_metadata['Grid']['minY']),
+    'maxX': int(config_metadata['Grid']['maxX']),
+    'maxY': int(config_metadata['Grid']['maxY']),
+    'numX': int(config_metadata['Grid']['numX']),
+    'numY': int(config_metadata['Grid']['numY']),
 }
 
 
