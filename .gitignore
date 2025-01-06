@@ -16,3 +16,4 @@ AwakinoUSTCscan/CMakeLists.txt.user
 # 根目录下需要上传的东西
 !.gitignore
 !config.ini
+!requirements.txt
