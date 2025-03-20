@@ -5,6 +5,7 @@ import tkinter as tk
 from tkinter import ttk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
+from scipy.signal import butter, filtfilt, hilbert
 
 config_path = os.path.join('.', 'config.ini')
 config = configparser.ConfigParser()
@@ -14,6 +15,7 @@ py_data_path = config['DataSelect']['CurrentDataBase']
 py_data_path = os.path.join('.', 'NpWaveData', py_data_path)
 
 waveform_data = np.load(os.path.join(py_data_path, 'waveform_data.npy'))
+waveform_data = waveform_data - np.mean(waveform_data) # 去除直流分量
 
 # 解析Metadata.ini文件
 config_metadata = configparser.ConfigParser()
@@ -35,6 +37,7 @@ class WaveformViewer:
         self.root = root
         self.data = data
         self.current_index = 0
+        self.current_point = [0, 0]
 
         # 获取数据维度
         self.height, self.width, self.depth = data.shape
@@ -54,6 +57,7 @@ class WaveformViewer:
         self.wave_ax.set_xlabel("Index")
         self.wave_ax.set_ylabel("Value")
         self.waveform_line, = self.wave_ax.plot([], [], lw=2)
+        self.envelope, = self.wave_ax.plot([], [], label='Envelope', lw=2)
         self.vertical_line = self.wave_ax.axvline(x=0, color='red', linestyle='--')  # 初始化红色竖线
 
         # 将Matplot C扫图片嵌入到Tkinter窗口
@@ -67,10 +71,22 @@ class WaveformViewer:
         self.slider = ttk.Scale(root, from_=0, to=self.depth - 1, orient=tk.HORIZONTAL, command=self.update_img)
         self.slider.pack(fill=tk.X, padx=10, pady=10)
 
+        # 创建保存按钮
+        self.save_button = ttk.Button(root, text="Save Index", command=self.save_index)
+        self.save_button.pack(pady=10)
+
     def update_wave(self, idx):
         # 更新右侧波形图
+        self.current_point = idx
         waveform = self.data[idx[1], idx[0], :]
         self.waveform_line.set_data(range(waveform.shape[0]), waveform)
+
+        filtered_waveform = self.apply_lowpass_filter(waveform, cutoff = 60)
+
+
+        # 计算包络线
+        envelope = np.abs(hilbert(filtered_waveform))
+        self.envelope.set_data(range(waveform.shape[0]), envelope)
         self.wave_ax.relim()
         self.wave_ax.autoscale_view()
         self.canvas.draw()
@@ -82,6 +98,12 @@ class WaveformViewer:
         self.vertical_line.set_xdata([self.current_index, self.current_index])  # 示例红色竖线位置
         self.canvas.draw()
     
+    def apply_lowpass_filter(self, waveform, cutoff):
+        nyquist = 0.5 * 1000
+        normal_cutoff = cutoff / nyquist
+        b, a = butter(4, normal_cutoff, btype='low', analog=False)
+        return filtfilt(b, a, waveform)
+
     def on_click(self, event):
     # 确保点击发生在当前的 Axes 中
         if event.inaxes == self.ax:
@@ -90,6 +112,17 @@ class WaveformViewer:
             self.update_wave(idx=[x,y])
             # value = self.data[y, x, self.current_index]  # 获取对应数据值
 
+    def save_index(self):
+            config_save = configparser.ConfigParser()
+            config_save.read(os.path.join(py_data_path, 'SavedIndices.ini'))
+            section = str(self.current_point[0])
+            option = str(self.current_point[1])
+            if not config_save.has_section(section):
+                config_save.add_section(section)
+            config_save.set(section, option, str(self.current_index))
+            with open(os.path.join(py_data_path, 'SavedIndices.ini'), 'w') as configfile:
+                config_save.write(configfile)
+            print(f"Saved current_index={self.current_index} at section={section}, option={option}")
 
 # 创建Tkinter主窗口
 root = tk.Tk()

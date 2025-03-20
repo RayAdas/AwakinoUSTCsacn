@@ -17,3 +17,5 @@ AwakinoUSTCscan/CMakeLists.txt.user
 !.gitignore
 !config.ini
 !requirements.txt
+
+*.pyc
