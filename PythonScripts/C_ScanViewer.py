@@ -6,30 +6,14 @@ from tkinter import ttk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 from scipy.signal import butter, filtfilt, hilbert
+import torch
+from utility import FileIO
 
-config_path = os.path.join('.', 'config.ini')
-config = configparser.ConfigParser()
-config.read(config_path)
-
-py_data_path = config['DataSelect']['CurrentDataBase']
-py_data_path = os.path.join('.', 'NpWaveData', py_data_path)
-
-waveform_data = np.load(os.path.join(py_data_path, 'waveform_data.npy'))
+fio = FileIO()
+waveform_data = fio.get_waveform_data()
 waveform_data = waveform_data - np.mean(waveform_data) # 去除直流分量
 
-# 解析Metadata.ini文件
-config_metadata = configparser.ConfigParser()
-config_metadata.read(os.path.join(py_data_path, 'Metadata.ini'))
 
-# 读取网格信息
-grid_info = {
-    'minX': int(config_metadata['Grid']['minX']),
-    'minY': int(config_metadata['Grid']['minY']),
-    'maxX': int(config_metadata['Grid']['maxX']),
-    'maxY': int(config_metadata['Grid']['maxY']),
-    'numX': int(config_metadata['Grid']['numX']),
-    'numY': int(config_metadata['Grid']['numY']),
-}
 
 # 创建主窗口
 class WaveformViewer:
@@ -114,13 +98,13 @@ class WaveformViewer:
 
     def save_index(self):
             config_save = configparser.ConfigParser()
-            config_save.read(os.path.join(py_data_path, 'SavedIndices.ini'))
+            config_save.read(fio.join_datapath('SavedIndices.ini'))
             section = str(self.current_point[0])
             option = str(self.current_point[1])
             if not config_save.has_section(section):
                 config_save.add_section(section)
             config_save.set(section, option, str(self.current_index))
-            with open(os.path.join(py_data_path, 'SavedIndices.ini'), 'w') as configfile:
+            with open(fio.join_datapath('SavedIndices.ini'), 'w') as configfile:
                 config_save.write(configfile)
             print(f"Saved current_index={self.current_index} at section={section}, option={option}")
 

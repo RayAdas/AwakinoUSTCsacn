@@ -27,6 +27,11 @@ class FileIO():
         self.config_metadata.read(os.path.join(py_data_path, 'Metadata.ini'))
         self.waveform_data = np.load(os.path.join(py_data_path, 'waveform_data.npy'))
 
+        self.datapath = py_data_path
+
+    def join_datapath(self, path):
+        return os.path.join(self.datapath, path)
+
     def get_metadata(self):
         grid_info = {
             'minX': int(self.config_metadata['Grid']['minX']),
@@ -40,3 +45,47 @@ class FileIO():
     
     def get_waveform_data(self):
         return self.waveform_data
+    
+class Circle:
+    def __init__(self):
+        self.center = (0, 0)
+        self.radius = 0
+
+    def __contains__(self, item: tuple):
+        if len(item) != 2:
+            raise ValueError("Item must be a tuple of two elements")
+        if not all(isinstance(i, (int, float)) for i in item):
+            raise ValueError("Item must be a tuple of two numbers")
+        return (item[0] - self.center[0])**2 + (item[1] - self.center[1])**2 <= self.radius**2
+
+    def fit(self, points):
+        # 将点转换为numpy数组
+        points = np.array(points)
+        
+        # 构造矩阵A和向量b
+        A = []
+        b = []
+        for (x, y) in points:
+            A.append([x, y, 1])
+            b.append(x**2 + y**2)
+        A = np.array(A)
+        b = np.array(b)
+        
+        # 解线性方程组 A * c = b
+        c = np.linalg.lstsq(A, b, rcond=None)[0]
+        
+        # 计算圆心和半径
+        x_c = c[0] / 2
+        y_c = c[1] / 2
+        r = np.sqrt(c[2] + x_c**2 + y_c**2)
+        
+        self.center = (x_c, y_c)
+        self.radius = r
+
+if __name__ == "__main__":
+    points = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+    circle = Circle()
+    circle.fit(points)
+    print(circle.center, circle.radius)
+    print((0, 0) in circle)
+    print((1, 1) in circle)
