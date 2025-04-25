@@ -1,6 +1,8 @@
 import scipy
 import os, configparser
 import numpy as np
+from torch.utils.data import Dataset
+import torch
 
 class MyFilter:
     def __init__(self):
@@ -22,12 +24,13 @@ class FileIO():
         self.config = configparser.ConfigParser()
         self.config.read(config_path)
         py_data_path = self.config['DataSelect']['CurrentDataBase']
+        self.algorithm = self.config['AlgorithmSelect']['CurrentAlgorithm']
         py_data_path = os.path.join('.', 'NpWaveData', py_data_path)
+        self.datapath = py_data_path
+
         self.config_metadata = configparser.ConfigParser()
         self.config_metadata.read(os.path.join(py_data_path, 'Metadata.ini'))
         self.waveform_data = np.load(os.path.join(py_data_path, 'waveform_data.npy'))
-
-        self.datapath = py_data_path
 
     def join_datapath(self, path):
         return os.path.join(self.datapath, path)
@@ -81,6 +84,22 @@ class Circle:
         
         self.center = (x_c, y_c)
         self.radius = r
+
+class EchoDataset(Dataset):
+    def __init__(self):
+        self.data = []
+        self.tgt = []
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        return self.data[idx], self.tgt[idx]
+    
+    def load_file(self, file_path):
+        dataset_dict = torch.load(file_path)
+        self.data = dataset_dict['data']
+        self.tgt = dataset_dict['tgt']
 
 if __name__ == "__main__":
     points = [(0, 1), (1, 0), (0, -1), (-1, 0)]
