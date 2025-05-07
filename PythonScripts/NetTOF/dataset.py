@@ -1,7 +1,10 @@
 from utility import MyFilter, FileIO, Circle
 from torch.utils.data import Dataset
 import torch
+import random
 from imblearn.over_sampling import SMOTE  # Import SMOTE
+import os
+os.environ['LOKY_MAX_CPU_COUNT'] = '8'  # 你可以按实际核心数设，比如 4 或 8
 
 # 建立数据集
 class EchoDataset(Dataset):
@@ -35,6 +38,7 @@ class EchoDataset(Dataset):
         return self.data[idx], self.tgt[idx]
     
 if __name__ == '__main__':
+
     fio = FileIO()
     waveform_src = fio.get_waveform_data()
     points = [(46, 34), (25, 32), (33, 27), (30, 44)]
@@ -45,5 +49,11 @@ if __name__ == '__main__':
     dataset = EchoDataset()
     dataset.loadwave(waveform_src, circle)
 
-    data_dict = {'data': dataset.data, 'tgt': dataset.tgt}
-    torch.save(data_dict, fio.join_datapath('echo_dataset.pt'))
+    # Save set
+    dataset_dict = {'data': dataset.data, 'tgt': dataset.tgt}
+    try:
+        torch.save(dataset_dict, fio.join_datapath('echo_dataset.pt'))
+        print(f"Dataset saved to {fio.join_datapath('echo_dataset.pt')}")
+    except Exception as e:
+        print(f"Error saving dataset: {e}")
+        raise

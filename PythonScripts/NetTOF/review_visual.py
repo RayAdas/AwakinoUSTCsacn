@@ -4,9 +4,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix, classification_report
 
-def visualize_results(labels, preds, probs, sample_data=None):
-    plt.figure(figsize=(15, 10))
-    
+def visualize_results(labels, preds, probs, title = "Figure", sample_data=None):
+    plt.figure(figsize=(15, 10), num = title)
+
     # 混淆矩阵
     plt.subplot(2, 2, 1)
     cm = confusion_matrix(labels, preds)

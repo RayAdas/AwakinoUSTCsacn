@@ -1,3 +1,4 @@
+from copy import deepcopy
 import numpy as np
 import torch
 from torch.utils.data import Dataset
@@ -36,8 +37,9 @@ config = {
     'seq_length': 1000
 }
 
-def train_model(train_dataset):    
-    dataloader = DataLoader(train_dataset, batch_size=32, shuffle=True)
+def train_model(train_dataset, val_dataset):    
+    train_loader = DataLoader(train_dataset, batch_size=config['batch_size'], shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=config['batch_size'], shuffle=True)
 
     # Initialize model, loss function, and optimizer
     model = CNNModel()
@@ -51,11 +53,13 @@ def train_model(train_dataset):
 
     # Training loop
     num_epochs = 20
-    min_loss = float('inf')
-    best_model_wts = None
+    min_val_loss = float('inf')
+    best_weights = None
 
     for epoch in range(num_epochs):
-        for inputs, targets in dataloader:
+        model.train()
+        train_loss = 0.0
+        for inputs, targets in train_loader:
             # Move data to the device
             inputs = inputs.to(device)
             targets = targets.to(device)
@@ -66,23 +70,36 @@ def train_model(train_dataset):
             loss = criterion(outputs, targets.unsqueeze(1))
             loss.backward()
             optimizer.step()
+            train_loss += loss.item() * inputs.size(0)
+        train_loss /= len(train_dataset)
 
-        print(f'Epoch {epoch+1}/{num_epochs}, Loss: {loss.item()}',end='')
+        model.eval()
+        val_loss = 0.0
+        with torch.no_grad():
+            for inputs, targets in val_loader:
+                inputs = inputs.to(device).unsqueeze(1)
+                targets = targets.to(device)
+                outputs = model(inputs)
+                val_loss += criterion(outputs, targets.unsqueeze(1)).item() * inputs.size(0)
+        val_loss /= len(val_dataset)
 
-        if loss.item() < min_loss:
-            min_loss = loss.item()
-            best_model_wts = model
-            print(f' (best)')
+        print(f'Epoch {epoch+1}/{num_epochs}, Train Loss: {train_loss}, Val Loss: {val_loss}',end='')
+
+        if val_loss < min_val_loss:
+            min_val_loss = val_loss
+            best_weights = deepcopy(model.state_dict())
+            print(' (best)')
         else:
             print('')
-        
-    return best_model_wts
+
+    model.load_state_dict(best_weights)
+    return model
 
 def test_model(model, test_dataset):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     model.to(torch.device(device))
     
-    dataloader = DataLoader(test_dataset, batch_size=config['batch_size'], shuffle=False)
+    test_loader = DataLoader(test_dataset, batch_size=config['batch_size'], shuffle=False)
 
     model.eval()
     preds = []
@@ -90,15 +107,11 @@ def test_model(model, test_dataset):
     probs = []
 
     with torch.no_grad():
-        for inputs, targets in dataloader:
+        for inputs, targets in test_loader:
             inputs = inputs.unsqueeze(1)  # Add channel dimension
             outputs = model(inputs)
-            probs.append(outputs.cpu().numpy())
-            labels.append(targets.cpu().numpy())
+            probs.extend(outputs.cpu().numpy().flatten())
+            labels.extend(targets.cpu().numpy().flatten())
             preds.extend((outputs > 0.5).int().cpu().numpy().flatten())
-
-    # preds = np.concatenate(preds)
-    labels = np.concatenate(labels)
-    probs = np.concatenate(probs)
 
     return preds, labels, probs
