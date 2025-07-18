@@ -17,15 +17,6 @@ USTCscanMonitor::USTCscanMonitor():
     Motors[MotorY0] = new Motor(COM0,MotorName2CANIDMapping[MotorName::MotorY0]);
     Motors[MotorY1] = new Motor(COM0,MotorName2CANIDMapping[MotorName::MotorY1]);
     Motors[MotorZ] = new Motor(COM0,MotorName2CANIDMapping[MotorName::MotorZ]);
-
-    //定时查询电机位置
-    // connect(timerToUpdatePos, &QTimer::timeout, this, &USTCscanMonitor::askMotorPos);
-    // timerToUpdatePos->setInterval(25);
-
-    // connect(this->COM0, &COM::dataReaded, &(this->monitorToUpdatePos), &CompareWaiter::compare);
-    // connect(&(this->monitorToUpdatePos), &CompareWaiter::correctResponeGot
-    //         , this, &USTCscanMonitor::updatePos);
-    // timerToUpdatePos->start();
 }
 
 USTCscanMonitor::~USTCscanMonitor()
@@ -222,7 +213,7 @@ void USTCscanMonitor::autoMeasure(float fromX, float fromY, float toX, float toY
     QString timestamp = QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss");
     QString basePath = wavefilesPath + timestamp;  // 基础路径
     // 获取未被占用的路径名
-    QString path = FindUnusedFileName::getAvailableFileName(basePath);
+    QString path = FindUnusedFileName::getAvailableFileName(basePath,"");
     // 创建本次采集文件夹
     QDir dir;
     if(!dir.mkdir(path))

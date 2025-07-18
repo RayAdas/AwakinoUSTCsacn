@@ -15,8 +15,6 @@ OSC::OSC():
     // 获取上级目录
     QDir parentDir = QDir::current();
     parentDir.cdUp();
-    //parentDir.cdUp();
-    //parentDir.cdUp();
     // 将上级目录路径转换为QString
     QString parentDirPath = QDir::toNativeSeparators(parentDir.absolutePath());
     outputPath = parentDirPath + "\\OSCget";
@@ -117,9 +115,9 @@ QString OSC::saveWaveformData(){
         printf("Readed.\n");
         // 获取当前时间并格式化为字符串
         QString timestamp = QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss");
-        QString baseFileName = outputPath + timestamp + ".txt";  // 基础文件名
+        QString baseFileName = outputPath + timestamp;  // 基础文件名
         // 获取未被占用的文件名
-        QString fileName = FindUnusedFileName::getAvailableFileName(baseFileName);
+        QString fileName = FindUnusedFileName::getAvailableFileName(baseFileName, ".txt");
         // 打开文件
         QFile file(fileName);
         if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {

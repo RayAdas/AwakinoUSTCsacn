@@ -18,18 +18,20 @@ public:
     qint64 write(QString data);
     QList<PortName> getPortNameList();
     bool getIsOpen();
+
 public:
     QString lastReceived;
 
 signals:
     void dataSent(QString data);
     void dataReaded(QString data);
+
 private slots:
     void readData();
+
 private:
     QSerialPort qsp;
 };
-
 class CompareWaiter:public QObject{
     Q_OBJECT
 public:
@@ -42,9 +44,5 @@ signals:
 public slots:
     void compare(QString respone);
 };
-
-
-
-
 
 #endif // COM_H
