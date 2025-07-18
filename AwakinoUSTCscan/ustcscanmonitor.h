@@ -13,8 +13,8 @@ public://function
     //explicit USTCscanMonitor(QObject *parent = nullptr);
     ~USTCscanMonitor();
     void syncStop();
-    void goPos(float X, float Y);//自动抬笔，到达后不落笔
-    bool upZ();
+    void goPos(float X, float Y, bool justRelease = false);//自动抬笔，到达后不落笔
+    bool upZ(bool justRelease = false);
     void downZ();
     void homeXY();
     void homeZ();
@@ -28,8 +28,8 @@ public://variable
     Motor* Motors[4];
     const uint MotorName2CANIDMapping[4] = {1,2,3,4};
     const uint CANID2MotorNameMapping[5] = {9999,0,1,2,3};//你不该读到9999
-    float Zup = 10, Zpressure = -500;
-    float XMax = 500, YMax = 500;
+    float Zup = 10, Zpressure = -800;
+    float XMax = 550, YMax = 1100;
 
 signals:
     void signal_motorPosUpdated(MotorName motorName, float pos);
@@ -51,7 +51,7 @@ private:
     float posZ = 0;
     float coderMask[4] = {-1,1,-1,1};
     uint syncCount;
-    QString wavefilesPath = "C:\\Users\\Awaki\\Desktop\\shit_monitor\\OSCget\\";;
+    QString wavefilesPath = "C:\\Users\\Windy\\Desktop\\shit_monitor\\OSCget\\";;
 private slots:
     void syncGotOne();
     void updatePos(QString data);

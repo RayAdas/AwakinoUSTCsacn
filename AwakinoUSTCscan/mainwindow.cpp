@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 #include <qdatetime.h>
+#include <QThread>
 
 MainWindow::MainWindow(USTCscanMonitor *USTCSM0, QWidget *parent)
     : USTCSM0(USTCSM0)
@@ -46,6 +47,7 @@ void MainWindow::on_pushButton_linkOSC_clicked(){
     if(!this->USTCSM0->OSC0.getIsOpen())
     {
         bool isSuccess = this->USTCSM0->OSC0.open(devName);
+        // this->USTCSM0->OSC0.init();
         this->updateOSCLinkState(isSuccess);
     }
 }
@@ -190,7 +192,7 @@ void MainWindow::on_lineEdit_Zpressure_editingFinished()
 }
 
 void MainWindow::on_pushButton_go_Zup_clicked(){
-    this->USTCSM0->upZ();
+    this->USTCSM0->upZ(false);
 }
 
 void MainWindow::on_pushButton_go_Zdown_clicked(){
@@ -307,26 +309,13 @@ void MainWindow::on_pushButton_clear_browser_clicked()
     this->ui->textBrowser_COM->clear();
 }
 
-
-void MainWindow::on_pushButton_clicked()
-{
-    this->USTCSM0->Motors[MotorX]->ptMode(100,AbsRela::absPos);
-    // this->USTCSM0->Motors[MotorX]->ptMode(100,AbsRela::absPos,true);
-    // this->USTCSM0->syncMove();
-}
-
-
-void MainWindow::on_pushButton_2_clicked()
-{
-    this->USTCSM0->Motors[MotorX]->ptMode(300,AbsRela::absPos);
-    // this->USTCSM0->Motors[MotorX]->ptMode(300,AbsRela::absPos,true);
-    // this->USTCSM0->syncMove();
-}
-
-
-
 void MainWindow::on_pushButton_select_wavefiles_path_clicked()
 {
 
+}
+
+void MainWindow::on_pushButton_OSCSave_clicked()
+{
+    QString fn = this->USTCSM0->OSC0.saveWaveformData();
 }
 

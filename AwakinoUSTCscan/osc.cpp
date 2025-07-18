@@ -6,11 +6,21 @@
 #include <QDateTime>
 #include <QFile>
 #include "findunusedfilename.h"
-
+#include <QDir>
+#include <QThread>
 OSC::OSC():
     isOpen(false)
     ,buf(new ViUInt8[1024*1024*100])
 {
+    // 获取上级目录
+    QDir parentDir = QDir::current();
+    parentDir.cdUp();
+    //parentDir.cdUp();
+    //parentDir.cdUp();
+    // 将上级目录路径转换为QString
+    QString parentDirPath = QDir::toNativeSeparators(parentDir.absolutePath());
+    outputPath = parentDirPath + "\\OSCget";
+
     ViStatus status;
     // 创建资源管理器
     status = viOpenDefaultRM(&rm);
@@ -67,14 +77,41 @@ bool OSC::sendCommand(QString command){
     return true;
 }
 
+// bool OSC::init(){
+    // this->sendCommand(":TRIGger:HOLDoff 0.010"); // 10ms触发释抑
+    // 设置延迟时基偏移为 8μs, 设置主时基档位为 2μs
+    // this->sendCommand(":TIMebase:MAIN:OFFSet 0.000008");
+    // this->sendCommand(":TIMebase:MAIN:SCALe 0.000002");
+
+    // this->sendCommand(":ACQ:SRATe?");
+    // viSetAttribute(scope, VI_ATTR_TMO_VALUE, 5000);  // 超时设置为 5 秒
+    // ViUInt32 retCnt;
+    // ViStatus status;
+    // status = viRead(scope, buf, 1024*1024*100, &retCnt);
+    // std::string response(reinterpret_cast<const char*>(buf), retCnt);
+    // // 去掉结尾的换行符
+    // if (!response.empty() && response.back() == '\n') {
+    //     response.pop_back();
+    // }
+
+    // 比对字符串
+    // if (response != "5.000000E+8") {
+    //     printf("Error: got unexpected samplerate.\n");
+    // }
+// }
+
 QString OSC::saveWaveformData(){
     this->sendCommand(":WAVeform:SOUR CHAN1");//通道源1
-    this->sendCommand(":WAVeform:MODE NORMal");//波形读取模式普通
+    this->sendCommand(":WAVeform:MODE NORM");//波形读取模式普通
     this->sendCommand(":WAVeform:FORMat ASCII");//设置数据类型
-    this->sendCommand(":WAV:DATA?");//读取数据
+    this->sendCommand(":SINGle");
+    QThread::msleep(50);
+
     viSetAttribute(scope, VI_ATTR_TMO_VALUE, 5000);  // 超时设置为 5 秒
     ViUInt32 retCnt;
     ViStatus status;
+
+    this->sendCommand(":WAV:DATA?");//读取数据
     status = viRead(scope, buf, 1024*1024*100, &retCnt);
     if (status == VI_SUCCESS) {
         printf("Readed.\n");

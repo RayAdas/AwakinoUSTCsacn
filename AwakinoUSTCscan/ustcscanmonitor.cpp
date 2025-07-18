@@ -111,23 +111,33 @@ void USTCscanMonitor::syncStop(){
     this->syncMove();
 }
 
-bool USTCscanMonitor::upZ(){
-    Motors[MotorZ]->ptMode(this->Zup, AbsRela::absPos, false);//立即抬笔
-    return waitMotorReachT(MotorZ, 1000);
+bool USTCscanMonitor::upZ(bool justRelease){
+    if(justRelease)
+    {
+        Motors[MotorZ]->mMode(0, false);//假装抬笔
+        return true;
+    }
+    else
+    {
+        Motors[MotorZ]->ptMode(this->Zup, AbsRela::absPos, false);//立即抬笔
+        return waitMotorReachT(MotorZ, 1000);
+    }
+
+
 }
 
 void USTCscanMonitor::downZ(){
     Motors[MotorZ]->mMode(this->Zpressure, false);//立即落笔
 }
 
-void USTCscanMonitor::goPos(float X, float Y){
+void USTCscanMonitor::goPos(float X, float Y, bool justRelease){
     if(X < 0 or Y < 0){
         qDebug()<<"只能在第一象限移动。";return;
     }
     else if(X > XMax or Y > YMax){
         qDebug()<<"超出范围上限。";return;
     }
-    if(! upZ())//抬笔失败
+    if(! upZ(justRelease))//抬笔失败
     {return;}
     Motors[MotorX]->ptMode(X*ratioX, AbsRela::absPos, true);
     Motors[MotorY0]->ptMode(Y*ratioY, AbsRela::absPos, true);
@@ -137,7 +147,7 @@ void USTCscanMonitor::goPos(float X, float Y){
 }
 
 void USTCscanMonitor::homeXY(){
-    if(! upZ())//抬笔失败
+    if(! upZ(false))//抬笔失败
     {return;}
     Motors[MotorX]->triggerHoming(true);
     Motors[MotorY0]->triggerHoming(true);
@@ -239,25 +249,25 @@ void USTCscanMonitor::autoMeasure(float fromX, float fromY, float toX, float toY
     indexFile.setValue("Grid/maxY", minY+(numY-1)*intervalY);
     indexFile.setValue("Grid/numX", numX);
     indexFile.setValue("Grid/numY", numY);
-
+    // OSC0.init();
 
     for (int j = 0; j < numY; ++j) {
         float y = minY + j * intervalY;
         if (direction) {
             for (int i = 0; i < numX; ++i) {
                 float x = minX + i * intervalX;
-                goPos(x, y);
+                goPos(x, y, true);
                 downZ();
-                QThread::msleep(2000);
+                QThread::msleep(10);
                 QString fn = OSC0.saveWaveformData();
                 indexFile.setValue(QString::number(j) + "/" + QString::number(i), fn);
             }
         } else {
             for (int i = numX - 1; i >= 0; --i) {
                 float x = minX + i * intervalX;
-                goPos(x, y);
+                goPos(x, y, true);
                 downZ();
-                QThread::msleep(2000);
+                QThread::msleep(10);
                 QString fn = OSC0.saveWaveformData();
                 indexFile.setValue(QString::number(j) + "/" + QString::number(i), fn);
             }

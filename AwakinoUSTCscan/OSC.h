@@ -13,11 +13,12 @@ public:
     OSC();
     bool open(OSCdevName devName);
     bool sendCommand(QString command);
+    // bool init();
     QString saveWaveformData();
     void close();
     bool getIsOpen(){return isOpen;};
     QList<OSCdevName> getDevList();
-    QString outputPath = "C:\\Users\\Awaki\\Desktop\\shit_monitor\\OSCget\\";
+    QString outputPath;
 
 private:
     bool isOpen;
