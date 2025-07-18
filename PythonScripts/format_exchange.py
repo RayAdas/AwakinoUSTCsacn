@@ -1,3 +1,7 @@
+"""
+@discription: 读取USTCscan产生的txt文件, 转换为numpy格式
+"""
+
 import os
 import configparser
 import numpy as np
@@ -38,7 +42,12 @@ for y in range(grid_info['numY']):
             file_path = os.path.join(src_data_path, file_path)
             
             # 使用 np.loadtxt 读取波形数据文件
-            waveform_data[y, x] = np.loadtxt(file_path, delimiter=',')
+            w = np.loadtxt(file_path, delimiter=',')
+            if len(w) < 1000:
+                w = np.pad(w, (0, 1000 - len(w)), 'constant')
+            else:
+                w = w[:1000]
+            waveform_data[y, x] = w
 
 if not os.path.exists(py_data_path):
     os.makedirs(py_data_path)

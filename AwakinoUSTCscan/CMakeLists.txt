@@ -18,7 +18,6 @@ set(PROJECT_SOURCES
         mainwindow.ui
 )
 
-
 qt_add_executable(AwakinoUSTCscan
     MANUAL_FINALIZATION
     ${PROJECT_SOURCES}

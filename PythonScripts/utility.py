@@ -87,14 +87,17 @@ class Circle:
 
 class EchoDataset(Dataset):
     def __init__(self):
-        self.data = []
-        self.tgt = []
+        self.data = None
+        self.tgt = None
 
     def __len__(self):
         return len(self.data)
 
     def __getitem__(self, idx):
-        return self.data[idx], self.tgt[idx]
+        if self.tgt is not None:
+            return self.data[idx], self.tgt[idx]
+        else:
+            return self.data[idx]
     
     def load_file(self, file_path):
         dataset_dict = torch.load(file_path)

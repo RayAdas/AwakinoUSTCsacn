@@ -1,4 +1,3 @@
-import os
 import numpy as np
 import configparser
 import tkinter as tk
@@ -6,14 +5,11 @@ from tkinter import ttk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 from scipy.signal import butter, filtfilt, hilbert
-import torch
 from utility import FileIO
 
 fio = FileIO()
 waveform_data = fio.get_waveform_data()
 waveform_data = waveform_data - np.mean(waveform_data) # 去除直流分量
-
-
 
 # 创建主窗口
 class WaveformViewer:
@@ -65,8 +61,7 @@ class WaveformViewer:
         waveform = self.data[idx[1], idx[0], :]
         self.waveform_line.set_data(range(waveform.shape[0]), waveform)
 
-        filtered_waveform = self.apply_lowpass_filter(waveform, cutoff = 60)
-
+        filtered_waveform = self.apply_lowpass_filter(waveform, cutoff=60)
 
         # 计算包络线
         envelope = np.abs(hilbert(filtered_waveform))

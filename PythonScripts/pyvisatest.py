@@ -16,5 +16,8 @@ scope.write(':CLEar')
 idn = scope.query('*IDN?')
 print("Device ID:", idn)
 
+pos = scope.query(':TIMebase:HREFerence:POSition?')
+print("Horizontal Reference Position:", pos)
+
 # 关闭连接
 scope.close()

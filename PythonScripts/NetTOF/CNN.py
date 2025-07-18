@@ -115,3 +115,22 @@ def test_model(model, test_dataset):
             preds.extend((outputs > 0.5).int().cpu().numpy().flatten())
 
     return preds, labels, probs
+
+def inference(model, test_dataset):
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    model.to(torch.device(device))
+    
+    test_loader = DataLoader(test_dataset, batch_size=config['batch_size'], shuffle=False)
+
+    model.eval()
+    preds = []
+    probs = []
+
+    with torch.no_grad():
+        for inputs in test_loader:
+            inputs = inputs.unsqueeze(1)  # Add channel dimension
+            outputs = model(inputs)
+            probs.extend(outputs.cpu().numpy().flatten())
+            preds.extend((outputs > 0.5).int().cpu().numpy().flatten())
+
+    return preds, probs

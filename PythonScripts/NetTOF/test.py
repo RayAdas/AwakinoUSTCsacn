@@ -3,6 +3,7 @@ import review_visual
 from sklearn.metrics import classification_report
 import torch
 import CNN
+import os
 from utility import FileIO, EchoDataset
 
 if __name__ == "__main__":
