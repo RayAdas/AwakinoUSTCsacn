@@ -1,4 +1,4 @@
-#include "osc.h"
+#include "OSC.h"
 #include <QDebug>
 #include <QMessageBox>
 #include <QCoreApplication>
@@ -91,11 +91,17 @@ bool OSC::query(QString command){
     return true;
 }
 
-bool OSC::init(){
+bool OSC::init(QString* sampleRate, QString* head2trigger){
+    /* sampleRate为采样率
+     * head2trigger为采样序列的开头到触发位置的时间，等于SCALe*5-OFFSet
+     */
     this->write(":TRIGger:HOLDoff 0.010"); // 10ms触发释抑
     // 设置延迟时基偏移为 8μs, 设置主时基档位为 2μs
     this->write(":TIMebase:MAIN:OFFSet 0.000008");
     this->write(":TIMebase:MAIN:SCALe 0.000002");
+    theoreticalPointsNum = 1e4;
+    if (head2trigger != nullptr)
+    {*head2trigger = "0.000002";}
 
     if(!this->query(":ACQ:SRATe?"))
     {return false;}
@@ -106,6 +112,7 @@ bool OSC::init(){
         response.pop_back();
     }
 
+    sampleRate->fromStdString(response);
     // 比对字符串
     if (response == "5.000000E+8") {
         return true;
@@ -185,6 +192,9 @@ QString OSC::saveWaveformData(){
     
     // 将二进制数据转为16位无符号整数向量
     size_t num_points = data_length / 2;  // WORD格式，每个点2字节
+    if (data_length != theoreticalPointsNum){
+        return "Error, receive data_length, instead of theoreticalPointsNum points";
+    }
     std::cout<<"num_points"<<num_points<<std::endl;
     std::vector<uint16_t> raw_data(num_points);
     std::memcpy(raw_data.data(), data_start, data_length);

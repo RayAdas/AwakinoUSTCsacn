@@ -1,7 +1,7 @@
 #ifndef USTCSCANMONITOR_H
 #define USTCSCANMONITOR_H
 #include "OSC.h"
-#include "Motor.h"
+#include "motor.h"
 #include "COM.h"
 
 enum MotorName{MotorX=0, MotorY0=1, MotorY1=2, MotorZ=3};
