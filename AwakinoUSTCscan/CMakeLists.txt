@@ -25,8 +25,8 @@ qt_add_executable(AwakinoUSTCscan
     visa/visatype.h
     ustcscanmonitor.h ustcscanmonitor.cpp
     com.h com.cpp
-    automeasurer.h
-    automeasurer.cpp
+
+
     osc.h osc.cpp
     motor.h motor.cpp
     findunusedfilename.h findunusedfilename.cpp

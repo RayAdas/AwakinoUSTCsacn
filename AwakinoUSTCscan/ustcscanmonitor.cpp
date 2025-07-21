@@ -113,8 +113,6 @@ bool USTCscanMonitor::upZ(bool justRelease){
         Motors[MotorZ]->ptMode(this->Zup, AbsRela::absPos, false);//立即抬笔
         return waitMotorReachT(MotorZ, 1000);
     }
-
-
 }
 
 void USTCscanMonitor::downZ(){

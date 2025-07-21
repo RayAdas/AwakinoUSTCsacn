@@ -9,8 +9,8 @@ scope.timeout = 10000  # 设置超时时间（毫秒）
 
 # 配置波形输出格式
 scope.write(":WAV:SOUR CHAN1")       # 选择通道1
-scope.write(":WAV:FORM BYTE")        # 设置数据格式为BYTE（二进制，常用）
-scope.write(":WAV:MODE NORM")        # 标准模式（非平均、非峰值）
+scope.write(":WAV:FORM WORD")        # 设置数据格式为BYTE（二进制，常用）
+scope.write(":WAV:MODE RAW")        # 标准模式（非平均、非峰值）
 
 # 获取波形参数
 x_increment = float(scope.query(":WAV:XINC?"))
@@ -33,7 +33,7 @@ else:
     raise ValueError("Invalid data format")
 
 # 将二进制数据转为 numpy 数组
-data = np.frombuffer(data, dtype=np.uint8)
+data = np.frombuffer(data, dtype=np.uint16)
 
 # 转换为电压值
 voltages = (data - y_reference) * y_increment + y_origin

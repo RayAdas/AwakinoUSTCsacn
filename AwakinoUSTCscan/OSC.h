@@ -2,8 +2,10 @@
 #define OSC_H
 
 #include <QObject>
+#include <vector>
 
 #include "visa/visa.h"
+#include "npy.hpp"
 
 typedef QString OSCdevName;
 class OSC:public QObject
@@ -12,8 +14,9 @@ class OSC:public QObject
 public:
     OSC();
     bool open(OSCdevName devName);
-    bool sendCommand(QString command);
-    // bool init();
+    bool write(QString command);
+    bool query(QString command);
+    bool init();
     QString saveWaveformData();
     void close();
     bool getIsOpen(){return isOpen;};
@@ -23,7 +26,11 @@ public:
 private:
     bool isOpen;
     ViSession rm, scope;
+
+    // receive buffer
     ViUInt8 *buf;
+    ViUInt32 retCnt;
+    ViStatus status;
 };
 
 #endif // OSC_H

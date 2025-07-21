@@ -10,7 +10,7 @@ bool FindUnusedFileName::fileExists(const QString& path) {
 
 // 获取未被占用的文件名
 QString FindUnusedFileName::getAvailableFileName(const QString& baseFileName, const QString& fileExtension) {
-    QString extension;
+    QString extension = fileExtension;
     if (extension.isEmpty()) {
         // 如果没有提供扩展名，则不添加扩展名
         extension = "";

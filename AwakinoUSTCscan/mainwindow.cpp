@@ -47,7 +47,7 @@ void MainWindow::on_pushButton_linkOSC_clicked(){
     if(!this->USTCSM0->OSC0.getIsOpen())
     {
         bool isSuccess = this->USTCSM0->OSC0.open(devName);
-        // this->USTCSM0->OSC0.init();
+        this->USTCSM0->OSC0.init();
         this->updateOSCLinkState(isSuccess);
     }
 }
@@ -317,5 +317,18 @@ void MainWindow::on_pushButton_select_wavefiles_path_clicked()
 void MainWindow::on_pushButton_OSCSave_clicked()
 {
     QString fn = this->USTCSM0->OSC0.saveWaveformData();
+}
+
+
+void MainWindow::on_pushButton_clicked()
+{
+    while(1)
+    {
+        this->USTCSM0->downZ();
+        QThread::msleep(500);
+        this->USTCSM0->upZ(false);
+        QThread::msleep(500);
+    }
+
 }
 
