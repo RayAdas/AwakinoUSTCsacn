@@ -20,5 +20,6 @@ AwakinoUSTCscan/OSCget*_*.txt
 !.gitignore
 !config.ini
 !requirements.txt
+!MainWindow.png
 
 *.pyc
