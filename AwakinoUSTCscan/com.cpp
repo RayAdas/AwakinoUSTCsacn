@@ -7,8 +7,7 @@ COM::COM() {
     connect(&qsp,&QSerialPort::readyRead,this,&COM::readData);
 }
 
-QList<PortName> COM::getPortNameList()
-{
+QList<PortName> COM::getPortNameList(){
     QList<PortName> r;
     foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) {
         qDebug() << "Port:" << info.portName() << "Description:" << info.description();
@@ -17,8 +16,7 @@ QList<PortName> COM::getPortNameList()
     return r;
 }
 
-bool COM::open(QString portName)
-{
+bool COM::open(QString portName){
     qsp.setPortName(portName);
     qsp.setBaudRate(QSerialPort::Baud115200);
     qsp.setDataBits(QSerialPort::Data8);
@@ -32,20 +30,19 @@ bool COM::open(QString portName)
     }
     return r;
 }
+
 bool COM::getIsOpen(){
     bool r = qsp.isOpen();
     return r;
 }
-qint64 COM::write(QString data)
-{
+qint64 COM::write(QString data){
     emit dataSent(data);
     QByteArray qba = data.toLocal8Bit();
     char* cha = qba.data();
     return qsp.write(cha);
 }
 
-void COM::readData()
-{
+void COM::readData(){
     const QByteArray byteData = qsp.readAll();
     QString data = QString::fromUtf8(byteData);
     lastReceived = data;

@@ -43,6 +43,7 @@ for y in range(grid_info['numY']):
             
             # 使用 np.loadtxt 读取波形数据文件
             w = np.loadtxt(file_path, delimiter=',')
+            w = w.flatten()
             if len(w) < 1000:
                 w = np.pad(w, (0, 1000 - len(w)), 'constant')
             else:
