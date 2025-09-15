@@ -1,7 +1,7 @@
 import numpy as np
 
 # 载入npy文件
-data = np.load(r'OSCget/20250721_143058_voltage.npy')
+data = np.load(r'OSCget/20250722_121511/20250722_121513_1.npy')
 import matplotlib.pyplot as plt
 
 plt.plot(data)

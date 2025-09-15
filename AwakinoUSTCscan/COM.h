@@ -31,6 +31,7 @@ private slots:
 
 private:
     QSerialPort qsp;
+    QString dataBuffer; // 用于存储不完整的数据包
 };
 class CompareWaiter:public QObject{
     Q_OBJECT

@@ -279,7 +279,7 @@ void USTCscanMonitor::autoMeasure(float fromX, float fromY, float toX, float toY
 void USTCscanMonitor::syncGotOne(){
     this->syncCount++;
     QString timestamp = QDateTime::currentDateTime().toString("hh:mm:ss.zzz");
-    qDebug()<<"count["+timestamp+"]:"<<syncCount;
+    //qDebug()<<"count["+timestamp+"]:"<<syncCount;
     if(syncCount >= 3)
     {emit signal_allMotorReach();}
 }

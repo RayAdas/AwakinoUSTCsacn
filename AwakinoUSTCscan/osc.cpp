@@ -111,8 +111,8 @@ bool OSC::init(QString* sampleRate, QString* head2trigger){
     if (!response.empty() && response.back() == '\n') {
         response.pop_back();
     }
-
-    sampleRate->fromStdString(response);
+    if (head2trigger != nullptr)
+    {*sampleRate = QString::fromStdString(response);}
     // 比对字符串
     if (response == "5.000000E+8") {
         return true;
@@ -192,10 +192,10 @@ QString OSC::saveWaveformData(){
     
     // 将二进制数据转为16位无符号整数向量
     size_t num_points = data_length / 2;  // WORD格式，每个点2字节
-    if (data_length != theoreticalPointsNum){
-        return "Error, receive data_length, instead of theoreticalPointsNum points";
+    if (num_points != theoreticalPointsNum){
+        return QString("Error, receive %1, instead of %2 points").arg(data_length, theoreticalPointsNum);
     }
-    std::cout<<"num_points"<<num_points<<std::endl;
+    // std::cout<<"num_points"<<num_points<<std::endl;
     std::vector<uint16_t> raw_data(num_points);
     std::memcpy(raw_data.data(), data_start, data_length);
     

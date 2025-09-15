@@ -3,8 +3,10 @@
 
 #include <QSerialPortInfo>
 #include <QDebug>
+#include <qdir.h>
 COM::COM() {
     connect(&qsp,&QSerialPort::readyRead,this,&COM::readData);
+    dataBuffer.clear(); // 初始化缓冲区
 }
 
 QList<PortName> COM::getPortNameList()
@@ -29,6 +31,8 @@ bool COM::open(QString portName)
     bool r =qsp.open(QIODevice::ReadWrite);
     if(r == false){
         qDebug() << "fail to open " << portName;
+    } else {
+        dataBuffer.clear(); // 打开串口时清空缓冲区
     }
     return r;
 }
@@ -47,16 +51,34 @@ qint64 COM::write(QString data)
 void COM::readData()
 {
     const QByteArray byteData = qsp.readAll();
-    QString data = QString::fromUtf8(byteData);
-    lastReceived = data;
-    //qDebug()<<"SerialPort get:"<<data;
+    QString newData = QString::fromUtf8(byteData);
+    QFile file("received_data.txt");
+    if (file.open(QIODevice::Append | QIODevice::Text)) {
+        QTextStream out(&file);
+        out << newData;
+        file.close();
+    }
+
+    // 将新数据添加到缓冲区
+    dataBuffer += newData;
+    lastReceived = newData;
+    
+    // 处理缓冲区中的完整消息
     int start = 0;
     int index = 0;
 
-    while ((index = data.indexOf('\r', start)) != -1) {
-        // 将当前段落加上回车符分割保存
-        emit dataReaded(data.mid(start, index - start + 1));
+    while ((index = dataBuffer.indexOf('\r', start)) != -1) {
+        // 提取完整的消息（包含\r）
+        QString completeMessage = dataBuffer.mid(start, index - start + 1);
+        emit dataReaded(completeMessage);
         start = index + 1; // 更新起始位置
+    }
+    
+    // 保留缓冲区中未处理完的数据
+    if (start < dataBuffer.length()) {
+        dataBuffer = dataBuffer.mid(start);
+    } else {
+        dataBuffer.clear();
     }
 }
 
