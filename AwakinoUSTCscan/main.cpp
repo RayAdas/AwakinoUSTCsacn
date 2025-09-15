@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 
 #include <QApplication>
-#include "USTCscanMonitor.h"
+#include "ustcscanmonitor.h"
 #include <QStyleFactory>
 #include <QThread>
 
@@ -11,9 +11,10 @@ int main(int argc, char *argv[])
     QApplication::setStyle(QStyleFactory::create("Fusion"));
     USTCscanMonitor USTCSM0;
     QThread* thread_USTCSM0;
+
     thread_USTCSM0 = new QThread;
     USTCSM0.moveToThread(thread_USTCSM0);
-    //USTCSM0.COM0->moveToThread(thread_USTCSM0);
+
     USTCSM0.OSC0.moveToThread(thread_USTCSM0);
     thread_USTCSM0->start();
     MainWindow w(&USTCSM0);

@@ -90,6 +90,8 @@ private slots://由窗口发来的信号的处理槽
 
     void on_pushButton_OSCSave_clicked();
 
+    void on_pushButton_clicked();
+
 public:
     USTCscanMonitor* USTCSM0;
 private:

@@ -17,15 +17,6 @@ USTCscanMonitor::USTCscanMonitor():
     Motors[MotorY0] = new Motor(COM0,MotorName2CANIDMapping[MotorName::MotorY0]);
     Motors[MotorY1] = new Motor(COM0,MotorName2CANIDMapping[MotorName::MotorY1]);
     Motors[MotorZ] = new Motor(COM0,MotorName2CANIDMapping[MotorName::MotorZ]);
-
-    //定时查询电机位置
-    // connect(timerToUpdatePos, &QTimer::timeout, this, &USTCscanMonitor::askMotorPos);
-    // timerToUpdatePos->setInterval(25);
-
-    // connect(this->COM0, &COM::dataReaded, &(this->monitorToUpdatePos), &CompareWaiter::compare);
-    // connect(&(this->monitorToUpdatePos), &CompareWaiter::correctResponeGot
-    //         , this, &USTCscanMonitor::updatePos);
-    // timerToUpdatePos->start();
 }
 
 USTCscanMonitor::~USTCscanMonitor()
@@ -67,8 +58,7 @@ bool USTCscanMonitor::waitMotorReachT(MotorName motorName, uint overTime){
     return CompareWaiter::waitRespone(this->COM0, pattern, overTime);
 }
 
-void USTCscanMonitor::syncMove()
-{
+void USTCscanMonitor::syncMove(){
     QString s_frame_type = "T";
     QString s_id = id2QString(0);
     QString s_idx = "00";
@@ -119,11 +109,9 @@ bool USTCscanMonitor::upZ(bool justRelease){
     }
     else
     {
-        Motors[MotorZ]->ptMode(this->Zup, AbsRela::absPos, false);//立即抬笔
+        Motors[MotorZ]->ptMode(this->Zup, AbsRela::absPos, false);//真的抬笔
         return waitMotorReachT(MotorZ, 1000);
     }
-
-
 }
 
 void USTCscanMonitor::downZ(){
@@ -222,7 +210,7 @@ void USTCscanMonitor::autoMeasure(float fromX, float fromY, float toX, float toY
     QString timestamp = QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss");
     QString basePath = wavefilesPath + timestamp;  // 基础路径
     // 获取未被占用的路径名
-    QString path = FindUnusedFileName::getAvailableFileName(basePath);
+    QString path = FindUnusedFileName::getAvailableFileName(basePath,"");
     // 创建本次采集文件夹
     QDir dir;
     if(!dir.mkdir(path))
@@ -249,7 +237,12 @@ void USTCscanMonitor::autoMeasure(float fromX, float fromY, float toX, float toY
     indexFile.setValue("Grid/maxY", minY+(numY-1)*intervalY);
     indexFile.setValue("Grid/numX", numX);
     indexFile.setValue("Grid/numY", numY);
-    // OSC0.init();
+    QString sampleRate;
+    QString head2trigger;
+    OSC0.init(&sampleRate, &head2trigger);
+    indexFile.setValue("Wave/sampleRate", sampleRate);
+    indexFile.setValue("Wave/head2trigger", head2trigger);
+    int errorCount = 0;
 
     for (int j = 0; j < numY; ++j) {
         float y = minY + j * intervalY;
@@ -260,6 +253,9 @@ void USTCscanMonitor::autoMeasure(float fromX, float fromY, float toX, float toY
                 downZ();
                 QThread::msleep(10);
                 QString fn = OSC0.saveWaveformData();
+                if (fn.startsWith("Error")){
+                    errorCount += 1;
+                }
                 indexFile.setValue(QString::number(j) + "/" + QString::number(i), fn);
             }
         } else {
@@ -269,17 +265,21 @@ void USTCscanMonitor::autoMeasure(float fromX, float fromY, float toX, float toY
                 downZ();
                 QThread::msleep(10);
                 QString fn = OSC0.saveWaveformData();
+                if (fn.startsWith("Error")){
+                    errorCount += 1;
+                }
                 indexFile.setValue(QString::number(j) + "/" + QString::number(i), fn);
             }
         }
         direction = !direction; // 反转方向
     }
+    indexFile.setValue("Grid/errorCount", errorCount);
 }
 
 void USTCscanMonitor::syncGotOne(){
     this->syncCount++;
     QString timestamp = QDateTime::currentDateTime().toString("hh:mm:ss.zzz");
-    qDebug()<<"count["+timestamp+"]:"<<syncCount;
+    //qDebug()<<"count["+timestamp+"]:"<<syncCount;
     if(syncCount >= 3)
     {emit signal_allMotorReach();}
 }

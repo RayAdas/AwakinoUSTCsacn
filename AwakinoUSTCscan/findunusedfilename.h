@@ -6,7 +6,7 @@ class FindUnusedFileName
 {
 public:
     static bool fileExists(const QString& fileName);
-    static QString getAvailableFileName(const QString& baseFileName);
+    static QString getAvailableFileName(const QString& baseFileName, const QString& fileExtension);
 };
 
 #endif // FINDUNUSEDFILENAME_H
